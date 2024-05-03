@@ -23,7 +23,7 @@ async def bot_start(message: Message, state: FSMContext):
 @dp.message_handler(state=UserStates.number)
 async def search_by_number(message: Message, state: FSMContext):
     number = message.text
-    message.text.replace(" ", "")
+    number = number.replace(" ", "")
     if is_phone_number_valid(number):
         results: list[dict] = (
             database_connection.execute("SELECT * FROM phones WHERE \"phone_number\" = ?", [number]).fetchall())
