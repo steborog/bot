@@ -24,6 +24,7 @@ def loginOrRegister(telegram_id: int, alias: str, username: str) -> str:
         database_connection.execute(
             f"INSERT INTO \"{USERS_TABLE_NAME}\" (telegram_id, alias, username) values (?,?,?)", [telegram_id, alias, username]
         )
+        database_connection.commit()
         answer = f"Доброго дня, {alias}, Вас було успішно зареєстровано!"
 
     return answer
