@@ -1,6 +1,8 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import Command
 from aiogram.types import Message
+
+from filters.auth_filter import AuthFilter
 from loader import dp
 from states.UserStates import UserStates
 from utils.users_handler_utils import is_phone_number_valid, PhoneData, build_phone_data_line, login_or_register, \
@@ -19,7 +21,7 @@ async def bot_start(message: Message, state: FSMContext):
     await message.answer(f" {message.from_user.full_name}, введіть номер телефону для перевірки.")
 
 
-@dp.message_handler(state=UserStates.number)
+@dp.message_handler(AuthFilter(),state=UserStates.number)
 async def search_by_number(message: Message, state: FSMContext):
     number = message.text
     number = number.replace(" ", "")
