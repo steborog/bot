@@ -6,7 +6,7 @@ from filters.auth_filter import AuthFilter
 from loader import dp
 from models.users_handler_models import User, SearchRecord
 from states.UserStates import UserStates
-from utils.users_handler_utils import is_phone_number_valid, PhoneData, build_phone_data_line, login_or_register, \
+from utils.users_handler_utils import is_phone_number_valid, login_or_register, \
     get_data_by_phone, write_search_record, get_user_queries, build_query_report
 
 

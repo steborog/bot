@@ -1,9 +1,10 @@
 from typing import Optional
 
+from data.config import PHONES_TABLE_NAME, USERS_TABLE_NAME, USERS_SEARCH_RECORDS_TABLE_NAME
 from data.db import database_connection
+from loader import common_logger
 from models.users_handler_models import PhoneData, SearchRecord
 from models.users_handler_models import User
-from data.config import PHONES_TABLE_NAME, USERS_TABLE_NAME, USERS_SEARCH_RECORDS_TABLE_NAME
 
 
 def is_phone_number_valid(phone_number: str):
@@ -33,6 +34,8 @@ def login_or_register(telegram_id: int, alias: str, username: str) -> str:
     if user is not None:
         answer = f"Раді бачити Вас знову, {user.alias}!"
     else:
+        common_logger.info(f"Зареєстрований новий користувач: telegram id - {telegram_id}, username: {username},"
+                           f"alias: {alias}")
         database_connection.execute(
             f"INSERT INTO \"{USERS_TABLE_NAME}\" (telegram_id, alias, username) values (?,?,?)",
             [telegram_id, alias, username]
