@@ -1,0 +1,9 @@
+services:
+  steborog-bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    volumes:
+      - "./datasource.db:/app/datasource.db"
+    env_file:
+      - bot/.env
