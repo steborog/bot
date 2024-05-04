@@ -4,10 +4,10 @@ from aiogram.types import Message
 
 from filters.auth_filter import AuthFilter
 from loader import dp
-from models.users_handler_models import User
+from models.users_handler_models import User, SearchRecord
 from states.UserStates import UserStates
 from utils.users_handler_utils import is_phone_number_valid, PhoneData, build_phone_data_line, login_or_register, \
-    get_data_by_phone, write_search_record
+    get_data_by_phone, write_search_record, get_user_queries, build_query_report
 
 
 @dp.message_handler(Command("start"))
@@ -16,10 +16,10 @@ async def bot_start(message: Message):
     await message.answer(login_report)
 
 
-@dp.message_handler(Command("search"))
-async def bot_start(message: Message, state: FSMContext):
+@dp.message_handler(AuthFilter(), Command("search"))
+async def bot_start(message: Message, state: FSMContext, current_user: User):
     await state.set_state(UserStates.number)
-    await message.answer(f" {message.from_user.full_name}, введіть номер телефону для перевірки.")
+    await message.answer(f" {current_user.alias}, введіть номер телефону для перевірки.")
 
 
 @dp.message_handler(AuthFilter(), state=UserStates.number)
@@ -38,3 +38,16 @@ async def search_by_number(message: Message, state: FSMContext, current_user: Us
         await message.answer(report)
     else:
         await message.answer("Невалідний номер телефону. Введіть номер телефону у форматі +380XXXXXXXXX.")
+
+
+@dp.message_handler(AuthFilter(), Command('history'))
+async def list_queries_history(message: Message, current_user: User):
+    queries: list[SearchRecord] = get_user_queries(current_user.id)
+
+    report: str
+    if len(queries) > 0:
+        report = "Ось список Ваших запитів:\n" + "\n".join(map(build_query_report, queries))
+    else:
+        report = "За Вашим обліковим записом не знайдено жодних запитів"
+
+    await message.answer(report)

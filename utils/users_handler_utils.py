@@ -1,7 +1,7 @@
 from typing import Optional
 
 from data.db import database_connection
-from models.users_handler_models import PhoneData
+from models.users_handler_models import PhoneData, SearchRecord
 from models.users_handler_models import User
 from data.config import PHONES_TABLE_NAME, USERS_TABLE_NAME, USERS_SEARCH_RECORDS_TABLE_NAME
 
@@ -57,3 +57,13 @@ def write_search_record(user_id: int, input: str):
     database_connection.execute(f"INSERT INTO {USERS_SEARCH_RECORDS_TABLE_NAME} (user_id, query) VALUES (?, ?)",
                                 [user_id, input])
     database_connection.commit()
+
+
+def get_user_queries(user_id: int) -> list[SearchRecord]:
+    results = database_connection.execute(f"SELECT * FROM {USERS_SEARCH_RECORDS_TABLE_NAME} WHERE \"user_id\" = ?",
+                                          [user_id]).fetchall()
+    return list(map(lambda result_dict: SearchRecord(**result_dict), results))
+
+
+def build_query_report(record: SearchRecord):
+    return f"{record.id}: {record.query}"
