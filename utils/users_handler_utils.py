@@ -17,7 +17,7 @@ def build_phone_data_line(phone_data: PhoneData) -> str:
 
 def get_user_by_telegram_id(telegram_id: int) -> Optional[User]:
     user_dict = database_connection.execute(
-        f"SELECT * FROM {USERS_TABLE_NAME} WHERE \"telegram_id\" = ?", [telegram_id]
+        f"SELECT * FROM {USERS_TABLE_NAME} WHERE telegram_id = ?", [telegram_id]
     ).fetchone()
 
     if user_dict is not None:
@@ -47,7 +47,7 @@ def login_or_register(telegram_id: int, alias: str, username: str) -> str:
 
 
 def get_data_by_phone(phone: str) -> Optional[PhoneData]:
-    phone_data_dict = (database_connection.execute(f"SELECT * FROM {PHONES_TABLE_NAME} WHERE \"phone_number\" = ?",
+    phone_data_dict = (database_connection.execute(f"SELECT * FROM {PHONES_TABLE_NAME} WHERE phone_number = ?",
                                                    [phone]).fetchone())
 
     if phone_data_dict is not None:
@@ -63,7 +63,8 @@ def write_search_record(user_id: int, input: str):
 
 
 def get_user_queries(user_id: int) -> list[SearchRecord]:
-    results = database_connection.execute(f"SELECT * FROM {USERS_SEARCH_RECORDS_TABLE_NAME} WHERE \"user_id\" = ?",
+    results = database_connection.execute(f"SELECT * FROM {USERS_SEARCH_RECORDS_TABLE_NAME} WHERE user_id = ?"
+                                          "ORDER BY id DESC",
                                           [user_id]).fetchall()
     return list(map(lambda result_dict: SearchRecord(**result_dict), results))
 
