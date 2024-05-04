@@ -15,12 +15,11 @@ def build_phone_data_line(phone_data: PhoneData) -> str:
 
 
 def get_user_by_telegram_id(telegram_id: int) -> Optional[User]:
-    search_list = database_connection.execute(
+    user_dict = database_connection.execute(
         f"SELECT * FROM {USERS_TABLE_NAME} WHERE \"telegram_id\" = ?", [telegram_id]
     ).fetchone()
 
-    if len(search_list) > 0:
-        user_dict = search_list[0]
+    if user_dict is not None:
         return User(**user_dict)
     else:
         return None
