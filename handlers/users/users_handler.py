@@ -4,9 +4,10 @@ from aiogram.types import Message
 
 from filters.auth_filter import AuthFilter
 from loader import dp
+from models.users_handler_models import User
 from states.UserStates import UserStates
 from utils.users_handler_utils import is_phone_number_valid, PhoneData, build_phone_data_line, login_or_register, \
-    get_data_by_phone
+    get_data_by_phone, write_search_record
 
 
 @dp.message_handler(Command("start"))
@@ -21,12 +22,13 @@ async def bot_start(message: Message, state: FSMContext):
     await message.answer(f" {message.from_user.full_name}, введіть номер телефону для перевірки.")
 
 
-@dp.message_handler(AuthFilter(),state=UserStates.number)
-async def search_by_number(message: Message, state: FSMContext):
+@dp.message_handler(AuthFilter(), state=UserStates.number)
+async def search_by_number(message: Message, state: FSMContext, current_user: User):
     number = message.text
     number = number.replace(" ", "")
     if is_phone_number_valid(number):
         phone_data = get_data_by_phone(number)
+        write_search_record(current_user.id, message.text)
         report: str
         if phone_data is not None:
             report = f"{phone_data.name} {phone_data.phone_number}"

@@ -4,6 +4,6 @@ from aiogram.types import Message
 
 
 class AuthFilter(BoundFilter):
-    def check(self, message: Message):
+    async def check(self, message: Message):
         data = ctx_data.get()
         return data["current_user"] is not None

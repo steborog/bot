@@ -3,7 +3,7 @@ from typing import Optional
 from data.db import database_connection
 from models.users_handler_models import PhoneData
 from models.users_handler_models import User
-from data.config import PHONES_TABLE_NAME, USERS_TABLE_NAME
+from data.config import PHONES_TABLE_NAME, USERS_TABLE_NAME, USERS_SEARCH_RECORDS_TABLE_NAME
 
 
 def is_phone_number_valid(phone_number: str):
@@ -45,9 +45,15 @@ def login_or_register(telegram_id: int, alias: str, username: str) -> str:
 
 def get_data_by_phone(phone: str) -> Optional[PhoneData]:
     phone_data_dict = (database_connection.execute(f"SELECT * FROM {PHONES_TABLE_NAME} WHERE \"phone_number\" = ?",
-                                        [phone]).fetchone())
+                                                   [phone]).fetchone())
 
     if phone_data_dict is not None:
         return PhoneData(**phone_data_dict)
     else:
         return None
+
+
+def write_search_record(user_id: int, input: str):
+    database_connection.execute(f"INSERT INTO {USERS_SEARCH_RECORDS_TABLE_NAME} (user_id, query) VALUES (?, ?)",
+                                [user_id, input])
+    database_connection.commit()
