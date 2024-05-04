@@ -1,38 +1,15 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import Command
 from aiogram.types import Message
-
-from data.config import PHONES_TABLE_NAME, USERS_TABLE_NAME
-from data.db import database_connection
 from loader import dp
-from models.users_handler_models import User
 from states.UserStates import UserStates
-from utils.users_handler_utils import is_phone_number_valid, PhoneData, build_phone_data_line
-
-
-def loginOrRegister(telegram_id: int, alias: str, username: str) -> str:
-    search_list = database_connection.execute(
-        f"SELECT * FROM {USERS_TABLE_NAME} WHERE \"telegram_id\" = ?", [telegram_id]
-    ).fetchall()
-
-    answer: str
-
-    if len(search_list) > 0:
-        existed_user = User(**search_list[0])
-        answer = f"Раді бачити Вас знову, {existed_user.alias}!"
-    else:
-        database_connection.execute(
-            f"INSERT INTO \"{USERS_TABLE_NAME}\" (telegram_id, alias, username) values (?,?,?)", [telegram_id, alias, username]
-        )
-        database_connection.commit()
-        answer = f"Доброго дня, {alias}, Вас було успішно зареєстровано!"
-
-    return answer
+from utils.users_handler_utils import is_phone_number_valid, PhoneData, build_phone_data_line, login_or_register, \
+    get_data_by_phone
 
 
 @dp.message_handler(Command("start"))
 async def bot_start(message: Message):
-    login_report = loginOrRegister(message.from_user.id, message.from_user.full_name, message.from_user.username)
+    login_report = login_or_register(message.from_user.id, message.from_user.full_name, message.from_user.username)
     await message.answer(login_report)
 
 
@@ -47,12 +24,10 @@ async def search_by_number(message: Message, state: FSMContext):
     number = message.text
     number = number.replace(" ", "")
     if is_phone_number_valid(number):
-        results: list[dict] = (
-            database_connection.execute(f"SELECT * FROM {PHONES_TABLE_NAME} WHERE \"phone_number\" = ?",
-                                        [number]).fetchone())
+        phone_data = get_data_by_phone(number)
         report: str
-        if len(results) > 0:
-            report = "\n".join(map(lambda result: build_phone_data_line(PhoneData(**result)), results))
+        if phone_data is not None:
+            report = f"{phone_data.name} {phone_data.phone_number}"
         else:
             report = 'Нажаль, записів за Вашим запитом не було знайдено.'
         await state.reset_state()
